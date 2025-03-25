@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Charts from "./pages/Charts";
 import NowPlaying from "./pages/NowPlaying";
+import Countries from "./pages/Countries";
+import CountryTrends from "./pages/CountryTrends";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +23,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/charts" element={<Charts />} />
           <Route path="/now-playing" element={<NowPlaying />} />
+          <Route path="/countries" element={<Countries />} />
+          <Route path="/countries/:countryCode" element={<CountryTrends />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

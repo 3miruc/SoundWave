@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import Navbar from '@/components/Navbar';
 import ChartSection from '@/components/ChartSection';
 import MusicPlayer from '@/components/MusicPlayer';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { getTopTracks, getCountryChart, getMockTracks } from '@/services/spotifyService';
 import { toast } from '@/hooks/use-toast';
 
@@ -59,7 +59,11 @@ const Charts = () => {
         setPlayerMinimized(false);
       }
     } else {
-      toast.error('Unable to play this song.');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Unable to play this song."
+      });
     }
   };
   
@@ -103,10 +107,7 @@ const Charts = () => {
       
       <div className="pb-24 md:pb-32">
         {loading ? (
-          <div className="container mx-auto py-16 text-center">
-            <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading chart data...</p>
-          </div>
+          <LoadingSpinner message="Loading chart data..." />
         ) : (
           <>
             <ChartSection 
