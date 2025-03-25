@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import Navbar from '@/components/Navbar';
-import TrendingSongs from '@/components/TrendingSongs';
+import ChartSection from '@/components/ChartSection';
 import MusicPlayer from '@/components/MusicPlayer';
-import { getTopTracks, getNewReleases, getMockTracks } from '@/services/spotifyService';
+import { getTopTracks, getCountryChart, getMockTracks } from '@/services/spotifyService';
 import { toast } from '@/components/ui/sonner';
 
-const Index = () => {
-  const [trendingSongs, setTrendingSongs] = useState<any[]>([]);
-  const [newReleases, setNewReleases] = useState<any[]>([]);
+const Charts = () => {
+  const [globalCharts, setGlobalCharts] = useState<any[]>([]);
+  const [usCharts, setUsCharts] = useState<any[]>([]);
   const [currentSong, setCurrentSong] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playerMinimized, setPlayerMinimized] = useState(true);
@@ -20,20 +20,20 @@ const Index = () => {
       try {
         setLoading(true);
         
-        const [topTracks, releases] = await Promise.all([
-          getTopTracks(10),
-          getNewReleases(10)
+        const [globalTracks, usTracks] = await Promise.all([
+          getTopTracks(20),
+          getCountryChart('US', 20)
         ]);
         
-        setTrendingSongs(topTracks.length > 0 ? topTracks : getMockTracks());
-        setNewReleases(releases.length > 0 ? releases : getMockTracks());
+        setGlobalCharts(globalTracks.length > 0 ? globalTracks : getMockTracks());
+        setUsCharts(usTracks.length > 0 ? usTracks : getMockTracks());
         
         setLoading(false);
       } catch (error) {
-        console.error('Error loading data:', error);
-        setTrendingSongs(getMockTracks());
-        setNewReleases(getMockTracks());
-        toast.error('Failed to load some data. Using sample data instead.');
+        console.error('Error loading chart data:', error);
+        setGlobalCharts(getMockTracks());
+        setUsCharts(getMockTracks());
+        toast.error('Failed to load chart data. Using sample data instead.');
         setLoading(false);
       }
     };
@@ -42,7 +42,7 @@ const Index = () => {
   }, []);
   
   const handlePlay = (id: string) => {
-    const song = [...trendingSongs, ...newReleases].find(song => song.id === id);
+    const song = [...globalCharts, ...usCharts].find(song => song.id === id);
     
     if (song) {
       if (currentSong && currentSong.id === id) {
@@ -66,7 +66,7 @@ const Index = () => {
   const handleNext = () => {
     if (!currentSong) return;
     
-    const allSongs = [...trendingSongs, ...newReleases];
+    const allSongs = [...globalCharts, ...usCharts];
     const currentIndex = allSongs.findIndex(song => song.id === currentSong.id);
     
     if (currentIndex > -1 && currentIndex < allSongs.length - 1) {
@@ -78,7 +78,7 @@ const Index = () => {
   const handlePrevious = () => {
     if (!currentSong) return;
     
-    const allSongs = [...trendingSongs, ...newReleases];
+    const allSongs = [...globalCharts, ...usCharts];
     const currentIndex = allSongs.findIndex(song => song.id === currentSong.id);
     
     if (currentIndex > 0) {
@@ -92,36 +92,36 @@ const Index = () => {
       <Navbar />
       
       <Hero 
-        title="Discover New Music"
-        subtitle="Listen to the latest and greatest songs from around the world"
-        imageSrc="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=2074&ixlib=rb-4.0.3"
+        title="Charts"
+        subtitle="Discover the most popular music from around the world"
+        className="min-h-[50vh]"
       />
       
       <div className="pb-24 md:pb-32">
         {loading ? (
           <div className="container mx-auto py-16 text-center">
             <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading amazing music...</p>
+            <p className="text-gray-600">Loading chart data...</p>
           </div>
         ) : (
           <>
-            <TrendingSongs 
-              title="Trending Now"
-              songs={trendingSongs} 
+            <ChartSection 
+              title="Global Top 20"
+              description="The most popular songs on Spotify worldwide"
+              songs={globalCharts} 
               onPlay={handlePlay} 
               currentlyPlaying={isPlaying ? currentSong?.id : undefined}
-              showViewMore
-              onViewMore={() => console.log('View more trending')}
+              type="list"
             />
             
-            <TrendingSongs 
-              title="New Releases"
-              songs={newReleases} 
+            <ChartSection 
+              title="United States Top 20"
+              description="The hottest tracks in the United States"
+              songs={usCharts} 
               onPlay={handlePlay} 
               currentlyPlaying={isPlaying ? currentSong?.id : undefined}
-              className="mt-8"
-              showViewMore
-              onViewMore={() => console.log('View more releases')}
+              className="mt-12"
+              type="list"
             />
           </>
         )}
@@ -142,4 +142,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Charts;
