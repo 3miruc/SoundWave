@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { getTrackDetails, getTopTracks, getMockTracks } from '@/services/spotifyService';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/hooks/use-toast';
 import BackgroundBlur from '@/components/BackgroundBlur';
 import SongCard from '@/components/SongCard';
 

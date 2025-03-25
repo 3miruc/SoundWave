@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import Navbar from '@/components/Navbar';
 import ChartSection from '@/components/ChartSection';
 import MusicPlayer from '@/components/MusicPlayer';
 import { getTopTracks, getCountryChart, getMockTracks } from '@/services/spotifyService';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/hooks/use-toast';
 
 const Charts = () => {
   const [globalCharts, setGlobalCharts] = useState<any[]>([]);

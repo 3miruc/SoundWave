@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import Navbar from '@/components/Navbar';
 import TrendingSongs from '@/components/TrendingSongs';
 import MusicPlayer from '@/components/MusicPlayer';
 import { getTopTracks, getNewReleases, getMockTracks } from '@/services/spotifyService';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [trendingSongs, setTrendingSongs] = useState<any[]>([]);
