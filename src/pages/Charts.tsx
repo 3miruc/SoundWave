@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import Navbar from '@/components/Navbar';
@@ -32,7 +33,11 @@ const Charts = () => {
         console.error('Error loading chart data:', error);
         setGlobalCharts(getMockTracks());
         setUsCharts(getMockTracks());
-        toast.error('Failed to load chart data. Using sample data instead.');
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load chart data. Using sample data instead."
+        });
         setLoading(false);
       }
     };
