@@ -1,4 +1,5 @@
 // Using the Spotify API client ID: e6cf501fb09b4b3783545232ca6e696d
+import { searchYouTubeVideo, getYouTubeVideoUrl, getHighQualityThumbnail } from './youtubeService';
 
 interface SpotifyToken {
   access_token: string;
@@ -91,12 +92,34 @@ const fetchFromSpotify = async (endpoint: string) => {
   }
 };
 
+// Function to enhance track with YouTube data
+const enhanceTrackWithYouTube = async (track: any) => {
+  try {
+    const searchQuery = `${track.title} ${track.artist}`;
+    const youtubeData = await searchYouTubeVideo(searchQuery);
+    
+    if (youtubeData) {
+      return {
+        ...track,
+        youtubeId: youtubeData.videoId,
+        youtubeUrl: getYouTubeVideoUrl(youtubeData.videoId),
+        backgroundImage: youtubeData.thumbnailUrl || track.albumArt,
+      };
+    }
+    
+    return track;
+  } catch (error) {
+    console.error('Error enhancing track with YouTube data:', error);
+    return track;
+  }
+};
+
 // Get global top tracks
 export const getTopTracks = async (limit = 20, offset = 0): Promise<any[]> => {
   try {
     const data = await fetchFromSpotify('/playlists/37i9dQZEVXbMDoHDwVN2tF'); // Global Top 50 playlist
     
-    return data.tracks.items
+    const tracks = data.tracks.items
       .slice(offset, offset + limit)
       .map((item: any) => {
         const track = item.track;
@@ -109,6 +132,13 @@ export const getTopTracks = async (limit = 20, offset = 0): Promise<any[]> => {
           audioUrl: track.preview_url
         };
       });
+      
+    // Enhance tracks with YouTube data
+    const enhancedTracks = await Promise.all(
+      tracks.map(track => enhanceTrackWithYouTube(track))
+    );
+    
+    return enhancedTracks;
   } catch (error) {
     console.error('Error getting top tracks:', error);
     return [];
@@ -120,7 +150,7 @@ export const getNewReleases = async (limit = 20, offset = 0): Promise<any[]> => 
   try {
     const data = await fetchFromSpotify(`/browse/new-releases?limit=${limit}&offset=${offset}`);
     
-    return data.albums.items.map((album: any) => {
+    const tracks = data.albums.items.map((album: any) => {
       return {
         id: album.id,
         title: album.name,
@@ -130,6 +160,13 @@ export const getNewReleases = async (limit = 20, offset = 0): Promise<any[]> => 
         audioUrl: null // Preview URLs not available in this endpoint
       };
     });
+    
+    // Enhance tracks with YouTube data
+    const enhancedTracks = await Promise.all(
+      tracks.map(track => enhanceTrackWithYouTube(track))
+    );
+    
+    return enhancedTracks;
   } catch (error) {
     console.error('Error getting new releases:', error);
     return [];
@@ -147,7 +184,7 @@ export const getCountryChart = async (countryCode = 'US', limit = 20): Promise<a
       const playlistId = data.playlists.items[0].id;
       const playlistData = await fetchFromSpotify(`/playlists/${playlistId}`);
       
-      return playlistData.tracks.items
+      const tracks = playlistData.tracks.items
         .slice(0, limit)
         .map((item: any) => {
           const track = item.track;
@@ -160,6 +197,13 @@ export const getCountryChart = async (countryCode = 'US', limit = 20): Promise<a
             audioUrl: track.preview_url
           };
         });
+        
+      // Enhance tracks with YouTube data
+      const enhancedTracks = await Promise.all(
+        tracks.map(track => enhanceTrackWithYouTube(track))
+      );
+      
+      return enhancedTracks;
     }
     
     return [];
@@ -174,7 +218,7 @@ export const getTrackDetails = async (trackId: string): Promise<any> => {
   try {
     const data = await fetchFromSpotify(`/tracks/${trackId}`);
     
-    return {
+    const track = {
       id: data.id,
       title: data.name,
       artist: data.artists.map((artist: any) => artist.name).join(', '),
@@ -184,6 +228,9 @@ export const getTrackDetails = async (trackId: string): Promise<any> => {
       audioUrl: data.preview_url,
       popularity: data.popularity
     };
+    
+    // Enhance with YouTube data
+    return await enhanceTrackWithYouTube(track);
   } catch (error) {
     console.error('Error getting track details:', error);
     return null;
@@ -195,7 +242,7 @@ export const searchTracks = async (query: string, limit = 20): Promise<any[]> =>
   try {
     const data = await fetchFromSpotify(`/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}`);
     
-    return data.tracks.items.map((track: any) => {
+    const tracks = data.tracks.items.map((track: any) => {
       return {
         id: track.id,
         title: track.name,
@@ -205,6 +252,13 @@ export const searchTracks = async (query: string, limit = 20): Promise<any[]> =>
         audioUrl: track.preview_url
       };
     });
+    
+    // Enhance tracks with YouTube data
+    const enhancedTracks = await Promise.all(
+      tracks.map(track => enhanceTrackWithYouTube(track))
+    );
+    
+    return enhancedTracks;
   } catch (error) {
     console.error('Error searching tracks:', error);
     return [];
@@ -218,7 +272,7 @@ export const formatDuration = (ms: number): string => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-// Mock data for fallback when API fails
+// Mock data for fallback when API fails - now with YouTube IDs
 export const getMockTracks = (): any[] => {
   return [
     {
@@ -227,7 +281,10 @@ export const getMockTracks = (): any[] => {
       artist: 'The Weeknd',
       albumArt: 'https://via.placeholder.com/300',
       duration: '3:20',
-      audioUrl: 'https://p.scdn.co/mp3-preview/31f65c6be5a4c0f69b99fcee5a5b98f13fffee9f?cid=e6cf501fb09b4b3783545232ca6e696d'
+      audioUrl: 'https://p.scdn.co/mp3-preview/31f65c6be5a4c0f69b99fcee5a5b98f13fffee9f?cid=e6cf501fb09b4b3783545232ca6e696d',
+      youtubeId: 'J7p4bzqLvCw',
+      youtubeUrl: 'https://www.youtube.com/watch?v=J7p4bzqLvCw',
+      backgroundImage: 'https://img.youtube.com/vi/J7p4bzqLvCw/maxresdefault.jpg'
     },
     {
       id: '2',
@@ -235,7 +292,10 @@ export const getMockTracks = (): any[] => {
       artist: 'Ed Sheeran',
       albumArt: 'https://via.placeholder.com/300',
       duration: '3:54',
-      audioUrl: null
+      audioUrl: null,
+      youtubeId: 'JGwWNGJdvx8',
+      youtubeUrl: 'https://www.youtube.com/watch?v=JGwWNGJdvx8',
+      backgroundImage: 'https://img.youtube.com/vi/JGwWNGJdvx8/maxresdefault.jpg'
     },
     {
       id: '3',
@@ -243,7 +303,10 @@ export const getMockTracks = (): any[] => {
       artist: 'Tones and I',
       albumArt: 'https://via.placeholder.com/300',
       duration: '3:29',
-      audioUrl: null
+      audioUrl: null,
+      youtubeId: 'q0hyYWKXF0Q',
+      youtubeUrl: 'https://www.youtube.com/watch?v=q0hyYWKXF0Q',
+      backgroundImage: 'https://img.youtube.com/vi/q0hyYWKXF0Q/maxresdefault.jpg'
     },
     {
       id: '4',
@@ -251,7 +314,10 @@ export const getMockTracks = (): any[] => {
       artist: 'Lewis Capaldi',
       albumArt: 'https://via.placeholder.com/300',
       duration: '3:02',
-      audioUrl: null
+      audioUrl: null,
+      youtubeId: 'zABLecsR5UE',
+      youtubeUrl: 'https://www.youtube.com/watch?v=zABLecsR5UE',
+      backgroundImage: 'https://img.youtube.com/vi/zABLecsR5UE/maxresdefault.jpg'
     },
     {
       id: '5',
@@ -259,7 +325,10 @@ export const getMockTracks = (): any[] => {
       artist: 'Dua Lipa',
       albumArt: 'https://via.placeholder.com/300',
       duration: '3:03',
-      audioUrl: null
+      audioUrl: null,
+      youtubeId: 'oygrmJFKYZY',
+      youtubeUrl: 'https://www.youtube.com/watch?v=oygrmJFKYZY',
+      backgroundImage: 'https://img.youtube.com/vi/oygrmJFKYZY/maxresdefault.jpg'
     },
     {
       id: '6',
@@ -267,7 +336,10 @@ export const getMockTracks = (): any[] => {
       artist: 'Harry Styles',
       albumArt: 'https://via.placeholder.com/300',
       duration: '2:54',
-      audioUrl: null
+      audioUrl: null,
+      youtubeId: 'E07s5ZYygMg',
+      youtubeUrl: 'https://www.youtube.com/watch?v=E07s5ZYygMg',
+      backgroundImage: 'https://img.youtube.com/vi/E07s5ZYygMg/maxresdefault.jpg'
     },
     {
       id: '7',
@@ -275,7 +347,10 @@ export const getMockTracks = (): any[] => {
       artist: 'Billie Eilish',
       albumArt: 'https://via.placeholder.com/300',
       duration: '3:14',
-      audioUrl: null
+      audioUrl: null,
+      youtubeId: 'DyDfgMOUjCI',
+      youtubeUrl: 'https://www.youtube.com/watch?v=DyDfgMOUjCI',
+      backgroundImage: 'https://img.youtube.com/vi/DyDfgMOUjCI/maxresdefault.jpg'
     },
     {
       id: '8',
@@ -283,7 +358,10 @@ export const getMockTracks = (): any[] => {
       artist: 'Post Malone',
       albumArt: 'https://via.placeholder.com/300',
       duration: '3:35',
-      audioUrl: null
+      audioUrl: null,
+      youtubeId: 'wXhTHyIgQ_U',
+      youtubeUrl: 'https://www.youtube.com/watch?v=wXhTHyIgQ_U',
+      backgroundImage: 'https://img.youtube.com/vi/wXhTHyIgQ_U/maxresdefault.jpg'
     }
   ];
 };

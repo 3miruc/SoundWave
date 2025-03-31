@@ -10,6 +10,8 @@ interface TrackInfoProps {
     duration?: string;
     popularity?: number;
     audioUrl?: string;
+    youtubeId?: string;
+    youtubeUrl?: string;
   };
   isPlaying: boolean;
   handlePlayPause: () => void;
@@ -53,6 +55,20 @@ const TrackInfo = ({ currentSong, isPlaying, handlePlayPause }: TrackInfoProps) 
           )}
         </button>
         
+        {currentSong.youtubeUrl && (
+          <a 
+            href={currentSong.youtubeUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="px-6 py-3 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+              <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" fill="currentColor"/>
+            </svg>
+            Watch on YouTube
+          </a>
+        )}
+        
         {currentSong.duration && (
           <span className="text-gray-600">
             Duration: {currentSong.duration}
@@ -60,7 +76,20 @@ const TrackInfo = ({ currentSong, isPlaying, handlePlayPause }: TrackInfoProps) 
         )}
       </div>
       
-      {currentSong.audioUrl ? (
+      {currentSong.youtubeId ? (
+        <div className="w-full mb-6 aspect-video">
+          <iframe 
+            width="100%" 
+            height="100%" 
+            src={`https://www.youtube.com/embed/${currentSong.youtubeId}`} 
+            title={`${currentSong.title} by ${currentSong.artist}`}
+            frameBorder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowFullScreen
+            className="rounded-lg shadow-lg"
+          ></iframe>
+        </div>
+      ) : currentSong.audioUrl ? (
         <audio 
           src={currentSong.audioUrl} 
           controls 

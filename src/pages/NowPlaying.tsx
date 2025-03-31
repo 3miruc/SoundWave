@@ -106,14 +106,16 @@ const NowPlaying = () => {
     );
   }
   
+  const backgroundImage = currentSong.backgroundImage || currentSong.albumArt;
+  
   return (
     <div className="min-h-screen page-transition">
       <Navbar />
       
       <div className="relative min-h-screen pt-24 pb-16">
-        <div className="absolute inset-0 z-0 opacity-10">
+        <div className="absolute inset-0 z-0 opacity-20">
           <img 
-            src={currentSong.albumArt} 
+            src={backgroundImage} 
             alt="Background" 
             className="w-full h-full object-cover"
           />
