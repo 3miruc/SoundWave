@@ -10,6 +10,8 @@ interface MusicPlayerProps {
     artist: string;
     albumArt: string;
     audioUrl: string;
+    youtubeUrl?: string;
+    youtubeId?: string;
   } | null;
   isPlaying: boolean;
   onPlayPause: () => void;
@@ -103,31 +105,43 @@ const MusicPlayer = ({
   
   if (minimized) {
     return (
-      <BackgroundBlur
+      <div
         className={cn(
-          "fixed bottom-0 left-0 right-0 px-4 py-3 z-40 shadow-lg",
+          "fixed bottom-0 left-0 right-0 bg-card border-t border-border z-40 shadow-lg",
           className
         )}
-        intensity="medium"
-        color="rgba(255, 255, 255, 0.9)"
       >
         <div className="container mx-auto">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between py-2 px-4">
             <div className="flex items-center mr-4 min-w-0 flex-1">
               <img 
                 src={currentSong.albumArt} 
                 alt={`${currentSong.title} by ${currentSong.artist}`}
-                className="w-10 h-10 rounded-md object-cover mr-3"
+                className="w-12 h-12 rounded-md object-cover mr-3"
               />
               <div className="min-w-0">
                 <h4 className="font-medium text-sm truncate">{currentSong.title}</h4>
-                <p className="text-xs text-gray-500 truncate">{currentSong.artist}</p>
+                <p className="text-xs text-muted-foreground truncate">{currentSong.artist}</p>
               </div>
             </div>
             
             <div className="flex items-center space-x-3">
+              {currentSong.youtubeUrl && (
+                <a 
+                  href={currentSong.youtubeUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-red-500 hover:text-red-600 transition-colors"
+                  title="Listen on YouTube"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" fill="currentColor"/>
+                  </svg>
+                </a>
+              )}
+              
               <button 
-                className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-black transition-colors rounded-full"
+                className="w-8 h-8 flex items-center justify-center text-foreground hover:text-primary transition-colors rounded-full"
                 onClick={onPrevious}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -137,7 +151,7 @@ const MusicPlayer = ({
               </button>
               
               <button 
-                className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+                className="w-10 h-10 flex items-center justify-center bg-primary text-primary-foreground rounded-full hover:scale-105 transition-transform"
                 onClick={onPlayPause}
               >
                 {isPlaying ? (
@@ -153,7 +167,7 @@ const MusicPlayer = ({
               </button>
               
               <button 
-                className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-black transition-colors rounded-full"
+                className="w-8 h-8 flex items-center justify-center text-foreground hover:text-primary transition-colors rounded-full"
                 onClick={onNext}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -163,7 +177,7 @@ const MusicPlayer = ({
               </button>
               
               <button 
-                className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-black transition-colors rounded-full"
+                className="w-8 h-8 flex items-center justify-center text-foreground hover:text-primary transition-colors rounded-full"
                 onClick={onToggleMinimize}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -173,30 +187,28 @@ const MusicPlayer = ({
             </div>
           </div>
           
-          <div className="mt-1 relative h-1 bg-gray-200 rounded-full overflow-hidden">
+          <div className="px-4 relative h-1 bg-muted rounded-full overflow-hidden">
             <div 
-              className="absolute h-full bg-black rounded-full"
+              className="absolute h-full bg-primary rounded-full"
               style={{ width: `${progress}%` }}
             />
           </div>
           
           <audio ref={audioRef} src={currentSong.audioUrl} />
         </div>
-      </BackgroundBlur>
+      </div>
     );
   }
   
   return (
-    <BackgroundBlur
+    <div
       className={cn(
-        "fixed bottom-0 left-0 right-0 px-4 py-6 z-40 shadow-lg",
+        "fixed bottom-0 left-0 right-0 bg-card border-t border-border z-40 shadow-lg",
         className
       )}
-      intensity="medium"
-      color="rgba(255, 255, 255, 0.9)"
     >
       <div className="container mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between py-4 px-4">
           <div className="flex items-center mb-4 md:mb-0 min-w-0 md:flex-1">
             <img 
               src={currentSong.albumArt} 
@@ -205,14 +217,28 @@ const MusicPlayer = ({
             />
             <div className="min-w-0">
               <h3 className="font-medium text-lg truncate">{currentSong.title}</h3>
-              <p className="text-gray-500 truncate">{currentSong.artist}</p>
+              <p className="text-muted-foreground truncate">{currentSong.artist}</p>
             </div>
+            
+            {currentSong.youtubeUrl && (
+              <a 
+                href={currentSong.youtubeUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="ml-4 flex items-center space-x-1 text-red-500 hover:text-red-600 transition-colors text-sm"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="inline-block">
+                  <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" fill="currentColor"/>
+                </svg>
+                <span>YouTube</span>
+              </a>
+            )}
           </div>
           
           <div className="flex-1 max-w-xl">
             <div className="flex items-center space-x-4 justify-center mb-2">
               <button 
-                className="w-10 h-10 flex items-center justify-center text-gray-700 hover:text-black transition-colors rounded-full"
+                className="w-10 h-10 flex items-center justify-center text-foreground hover:text-primary transition-colors rounded-full"
                 onClick={onPrevious}
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -222,7 +248,7 @@ const MusicPlayer = ({
               </button>
               
               <button 
-                className="w-14 h-14 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+                className="w-14 h-14 flex items-center justify-center bg-primary text-primary-foreground rounded-full hover:scale-105 transition-transform"
                 onClick={onPlayPause}
               >
                 {isPlaying ? (
@@ -238,7 +264,7 @@ const MusicPlayer = ({
               </button>
               
               <button 
-                className="w-10 h-10 flex items-center justify-center text-gray-700 hover:text-black transition-colors rounded-full"
+                className="w-10 h-10 flex items-center justify-center text-foreground hover:text-primary transition-colors rounded-full"
                 onClick={onNext}
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -249,7 +275,7 @@ const MusicPlayer = ({
             </div>
             
             <div className="flex items-center">
-              <span className="text-xs text-gray-500 w-10 text-right mr-2">
+              <span className="text-xs text-muted-foreground w-10 text-right mr-2">
                 {formatTime(currentTime)}
               </span>
               <input
@@ -258,9 +284,9 @@ const MusicPlayer = ({
                 max="100"
                 value={progress}
                 onChange={handleProgressChange}
-                className="h-1 flex-1 appearance-none bg-gray-200 rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-black cursor-pointer"
+                className="h-1 flex-1 appearance-none bg-muted rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary cursor-pointer"
               />
-              <span className="text-xs text-gray-500 w-10 ml-2">
+              <span className="text-xs text-muted-foreground w-10 ml-2">
                 {formatTime(duration)}
               </span>
             </div>
@@ -268,7 +294,7 @@ const MusicPlayer = ({
           
           <div className="hidden md:flex md:items-center md:justify-end md:flex-1">
             <button 
-              className="w-10 h-10 flex items-center justify-center text-gray-700 hover:text-black transition-colors rounded-full"
+              className="w-10 h-10 flex items-center justify-center text-foreground hover:text-primary transition-colors rounded-full"
               onClick={onToggleMinimize}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -280,7 +306,7 @@ const MusicPlayer = ({
       </div>
       
       <audio ref={audioRef} src={currentSong.audioUrl} />
-    </BackgroundBlur>
+    </div>
   );
 };
 

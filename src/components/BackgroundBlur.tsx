@@ -13,7 +13,7 @@ const BackgroundBlur = ({
   children, 
   className,
   intensity = 'medium',
-  color = 'rgba(255, 255, 255, 0.5)'
+  color = 'rgba(0, 0, 0, 0.5)'
 }: BackgroundBlurProps) => {
   const blurIntensity = {
     low: 'backdrop-blur-sm',

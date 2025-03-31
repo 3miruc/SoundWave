@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import Navbar from '@/components/Navbar';
@@ -95,24 +96,32 @@ const Index = () => {
     }
   };
   
+  // Ensure YouTube URLs are passed to all songs
+  const songsWithYoutubeLinks = (songs: any[]) => {
+    return songs.map(song => ({
+      ...song,
+      youtubeUrl: song.youtubeUrl || `https://www.youtube.com/watch?v=${song.youtubeId}`
+    }));
+  };
+  
   return (
-    <div className="min-h-screen page-transition">
+    <div className="min-h-screen page-transition bg-background text-foreground">
       <Navbar />
       
-      <Hero 
-        title="Discover New Music"
-        subtitle="Listen to the latest and greatest songs from around the world"
-        imageSrc="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=2074&ixlib=rb-4.0.3"
-      />
-      
-      <div className="pb-24 md:pb-32">
+      <div className="pt-16 pb-32">
+        <Hero 
+          title="Discover New Music"
+          subtitle="Listen to the latest and greatest songs from around the world"
+          imageSrc="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=2074&ixlib=rb-4.0.3"
+        />
+        
         {loading ? (
           <LoadingSpinner message="Loading amazing music..." />
         ) : (
-          <>
+          <div className="spotify-container">
             <TrendingSongs 
               title="Trending Now"
-              songs={trendingSongs} 
+              songs={songsWithYoutubeLinks(trendingSongs)} 
               onPlay={handlePlay} 
               currentlyPlaying={isPlaying ? currentSong?.id : undefined}
               showViewMore
@@ -121,20 +130,23 @@ const Index = () => {
             
             <TrendingSongs 
               title="New Releases"
-              songs={newReleases} 
+              songs={songsWithYoutubeLinks(newReleases)} 
               onPlay={handlePlay} 
               currentlyPlaying={isPlaying ? currentSong?.id : undefined}
-              className="mt-8"
+              className="mt-12"
               showViewMore
               onViewMore={() => console.log('View more releases')}
             />
-          </>
+          </div>
         )}
       </div>
       
       {currentSong && (
         <MusicPlayer 
-          currentSong={currentSong}
+          currentSong={{
+            ...currentSong,
+            youtubeUrl: currentSong.youtubeUrl || `https://www.youtube.com/watch?v=${currentSong.youtubeId}`
+          }}
           isPlaying={isPlaying}
           onPlayPause={handlePlayPause}
           onNext={handleNext}
