@@ -1,5 +1,5 @@
 
-// Using the YouTube Data API with key AIzaSyD_iAqFl_DfcYBKfcYuTc5MYp5_Uo9SRLM
+// Using the YouTube Data API with key AIzaSyDESFdnFDhHci0l7eMYZy7mPCeQmFuGqic
 
 interface YouTubeSearchResult {
   id: {
@@ -24,25 +24,31 @@ interface YouTubeResponse {
 // Function to search YouTube for a music video
 export const searchYouTubeVideo = async (query: string): Promise<{ videoId: string; thumbnailUrl: string } | null> => {
   try {
-    const apiKey = 'AIzaSyD_iAqFl_DfcYBKfcYuTc5MYp5_Uo9SRLM';
+    const apiKey = 'AIzaSyDESFdnFDhHci0l7eMYZy7mPCeQmFuGqic';
     const searchQuery = `${query} official music video`;
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=${encodeURIComponent(searchQuery)}&type=video&key=${apiKey}`;
     
+    console.log('Searching YouTube for:', searchQuery);
     const response = await fetch(url);
     
     if (!response.ok) {
-      throw new Error(`YouTube API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`YouTube API error: ${response.status} ${response.statusText}`, errorText);
+      throw new Error(`YouTube API error: ${response.status} ${response.statusText}`);
     }
     
     const data: YouTubeResponse = await response.json();
+    console.log('YouTube API response:', data);
     
     if (data.items && data.items.length > 0) {
       const videoId = data.items[0].id.videoId;
       const thumbnailUrl = data.items[0].snippet.thumbnails.high.url;
       
+      console.log('Found YouTube video:', videoId, thumbnailUrl);
       return { videoId, thumbnailUrl };
     }
     
+    console.log('No YouTube videos found for query:', query);
     return null;
   } catch (error) {
     console.error('Error searching YouTube:', error);

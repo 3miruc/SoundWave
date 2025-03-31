@@ -1,6 +1,8 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import BackgroundBlur from '@/components/BackgroundBlur';
+import { searchYouTubeVideo, getYouTubeVideoUrl } from '@/services/youtubeService';
+import { toast } from '@/hooks/use-toast';
 
 interface TrackInfoProps {
   currentSong: {
@@ -18,6 +20,44 @@ interface TrackInfoProps {
 }
 
 const TrackInfo = ({ currentSong, isPlaying, handlePlayPause }: TrackInfoProps) => {
+  const [youtubeId, setYoutubeId] = useState<string | undefined>(currentSong.youtubeId);
+  const [youtubeUrl, setYoutubeUrl] = useState<string | undefined>(currentSong.youtubeUrl);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Reset YouTube ID and URL when current song changes
+    setYoutubeId(currentSong.youtubeId);
+    setYoutubeUrl(currentSong.youtubeUrl);
+    
+    // If no YouTube ID provided, search for it
+    if (!currentSong.youtubeId) {
+      const searchQuery = `${currentSong.title} ${currentSong.artist}`;
+      setLoading(true);
+      
+      searchYouTubeVideo(searchQuery)
+        .then(result => {
+          if (result) {
+            setYoutubeId(result.videoId);
+            setYoutubeUrl(getYouTubeVideoUrl(result.videoId));
+            console.log('Found YouTube video for:', searchQuery, result);
+          } else {
+            console.log('No YouTube video found for:', searchQuery);
+          }
+        })
+        .catch(error => {
+          console.error('Error searching YouTube:', error);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de trouver la vidéo YouTube pour cette chanson."
+          });
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [currentSong]);
+
   return (
     <BackgroundBlur
       className="p-8 rounded-xl"
@@ -55,9 +95,9 @@ const TrackInfo = ({ currentSong, isPlaying, handlePlayPause }: TrackInfoProps) 
           )}
         </button>
         
-        {currentSong.youtubeUrl && (
+        {youtubeUrl && (
           <a 
-            href={currentSong.youtubeUrl} 
+            href={youtubeUrl} 
             target="_blank" 
             rel="noopener noreferrer"
             className="px-6 py-3 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
@@ -76,12 +116,16 @@ const TrackInfo = ({ currentSong, isPlaying, handlePlayPause }: TrackInfoProps) 
         )}
       </div>
       
-      {currentSong.youtubeId ? (
+      {loading ? (
+        <div className="w-full mb-6 aspect-video bg-gray-100 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+        </div>
+      ) : youtubeId ? (
         <div className="w-full mb-6 aspect-video">
           <iframe 
             width="100%" 
             height="100%" 
-            src={`https://www.youtube.com/embed/${currentSong.youtubeId}`} 
+            src={`https://www.youtube.com/embed/${youtubeId}`} 
             title={`${currentSong.title} by ${currentSong.artist}`}
             frameBorder="0" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
