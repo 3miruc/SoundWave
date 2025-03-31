@@ -2,8 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import SearchBar from './SearchBar';
 
-const Navbar = () => {
+interface NavbarProps {
+  onSearch?: (results: any[]) => void;
+}
+
+const Navbar = ({ onSearch }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   
@@ -25,21 +30,40 @@ const Navbar = () => {
   return (
     <nav className={cn(
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-      isScrolled ? "bg-white/95 backdrop-blur-sm shadow-md py-3" : "bg-transparent py-5"
+      isScrolled ? "bg-black/85 backdrop-blur-sm shadow-md py-3" : "bg-transparent py-5"
     )}>
-      <div className="container mx-auto flex items-center justify-between">
-        <NavLink to="/" className="text-2xl font-bold">
-          MusicApp
-        </NavLink>
+      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex items-center justify-between w-full md:w-auto">
+          <NavLink to="/" className="text-2xl font-bold text-white">
+            MusicApp
+          </NavLink>
+          
+          <div className="flex items-center space-x-6 md:hidden">
+            {navLinks.map(link => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                className={({ isActive }) => cn(
+                  "font-medium transition-colors",
+                  isActive ? "text-primary" : "text-gray-400 hover:text-white"
+                )}
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </div>
+        </div>
         
-        <div className="flex items-center space-x-6">
+        {onSearch && <SearchBar onSearchResults={onSearch} className="my-2 md:my-0" />}
+        
+        <div className="hidden md:flex items-center space-x-6">
           {navLinks.map(link => (
             <NavLink
               key={link.path}
               to={link.path}
               className={({ isActive }) => cn(
-                "font-medium hover:text-black transition-colors",
-                isActive ? "text-black" : "text-gray-600"
+                "font-medium transition-colors",
+                isActive ? "text-primary" : "text-gray-400 hover:text-white"
               )}
             >
               {link.label}
