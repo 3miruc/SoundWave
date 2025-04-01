@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Mic, Music, User, Disc, ListMusic } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -23,8 +22,14 @@ const SearchBar = ({ onSearchResults, className, showAdvanced = false }: SearchB
     'pop', 'rock', 'rap', 'electronic', 'jazz', 'classical', 'r&b', 'country', 'indie'
   ];
 
+  const isBrowserSupportingSpeechRecognition = () => {
+    return typeof window !== 'undefined' && 
+           'SpeechRecognition' in window || 
+           'webkitSpeechRecognition' in window;
+  };
+
   useEffect(() => {
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+    if (isBrowserSupportingSpeechRecognition()) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;

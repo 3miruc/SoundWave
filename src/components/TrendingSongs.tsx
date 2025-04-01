@@ -9,6 +9,7 @@ interface Song {
   artist: string;
   albumArt: string;
   duration: string;
+  youtubeUrl?: string;
 }
 
 interface TrendingSongsProps {
@@ -56,6 +57,7 @@ const TrendingSongs = ({
               duration={song.duration}
               onPlay={onPlay}
               isPlaying={currentlyPlaying === song.id}
+              youtubeUrl={song.youtubeUrl}
               className="animate-scale-in"
             />
           ))}

@@ -10,6 +10,7 @@ interface Song {
   albumArt: string;
   duration: string;
   rank?: number;
+  youtubeUrl?: string;
 }
 
 interface ChartSectionProps {
@@ -44,7 +45,7 @@ const ChartSection = ({
             {songs.map((song, index) => (
               <SongCard
                 key={song.id}
-                id={String(index + 1)}
+                id={song.id}
                 title={song.title}
                 artist={song.artist}
                 albumArt={song.albumArt}
@@ -52,6 +53,7 @@ const ChartSection = ({
                 onPlay={() => onPlay(song.id)}
                 isPlaying={currentlyPlaying === song.id}
                 variant="chart"
+                youtubeUrl={song.youtubeUrl}
                 className={index < songs.length - 1 ? "border-b" : ""}
               />
             ))}
@@ -68,6 +70,7 @@ const ChartSection = ({
                 duration={song.duration}
                 onPlay={onPlay}
                 isPlaying={currentlyPlaying === song.id}
+                youtubeUrl={song.youtubeUrl}
               />
             ))}
           </div>
