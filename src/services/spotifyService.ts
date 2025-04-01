@@ -1,4 +1,3 @@
-
 // Using the Spotify API client ID: e6cf501fb09b4b3783545232ca6e696d
 import { searchYouTubeVideo, getYouTubeVideoUrl, getHighQualityThumbnail } from './youtubeService';
 
@@ -125,6 +124,72 @@ export const searchTracks = async (query: string, limit = 20): Promise<any[]> =>
   console.log('Using mock data for search results');
   const mockTracks = getMockTracks();
   return mockTracks.slice(0, limit);
+};
+
+// Get multiple tracks by their IDs
+export const getMultipleTracks = async (trackIds: string[]): Promise<any[]> => {
+  if (!trackIds || trackIds.length === 0) {
+    return [];
+  }
+  
+  console.log('Fetching multiple tracks by IDs:', trackIds);
+  
+  try {
+    // In a real app with working Spotify API:
+    // const ids = trackIds.join(',');
+    // const data = await fetchFromSpotify(`/tracks?ids=${ids}`);
+    // return data.tracks.map(track => formatTrack(track));
+    
+    // Using mock data instead:
+    console.log('Using mock data for multiple tracks');
+    const mockTracks = getMockTracks();
+    
+    // Filter mock tracks to match requested IDs
+    const filteredTracks = mockTracks.filter(track => 
+      trackIds.includes(track.id)
+    );
+    
+    // If we don't have all the requested tracks in our mock data,
+    // just return what we found rather than throwing an error
+    console.log(`Found ${filteredTracks.length} of ${trackIds.length} requested tracks`);
+    
+    return filteredTracks;
+  } catch (error) {
+    console.error('Error fetching multiple tracks:', error);
+    throw error;
+  }
+};
+
+// Get related tracks based on a track ID
+export const getRelatedTracks = async (trackId: string, limit = 5): Promise<any[]> => {
+  // In a real app with working Spotify API, we would:
+  // 1. Get the track's artists and genres
+  // 2. Call the recommendations endpoint with these as seed values
+  
+  console.log('Finding related tracks for:', trackId);
+  
+  try {
+    // Using mock data
+    const mockTracks = getMockTracks();
+    const sourceTrack = mockTracks.find(track => track.id === trackId);
+    
+    if (!sourceTrack) {
+      console.warn('Source track not found in mock data');
+      return mockTracks.slice(0, limit);
+    }
+    
+    // Simulate "related" by returning other tracks (excluding the source track)
+    const relatedTracks = mockTracks
+      .filter(track => track.id !== trackId)
+      .slice(0, limit);
+    
+    console.log(`Found ${relatedTracks.length} related tracks`);
+    
+    return relatedTracks;
+  } catch (error) {
+    console.error('Error getting related tracks:', error);
+    return [];
+  }
 };
 
 // Helper function to format track duration
