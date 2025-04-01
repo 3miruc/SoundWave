@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { X } from 'lucide-react';
+import { X, Music, User, Disc, ListMusic, Plus, ExternalLink } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface SearchResultsProps {
   results: any[];
@@ -9,6 +10,7 @@ interface SearchResultsProps {
   onClose: () => void;
   currentlyPlaying?: string;
   className?: string;
+  onAddToPlaylist?: (item: any) => void;
 }
 
 const SearchResults = ({ 
@@ -16,12 +18,43 @@ const SearchResults = ({
   onPlay, 
   onClose,
   currentlyPlaying,
-  className 
+  className,
+  onAddToPlaylist
 }: SearchResultsProps) => {
   
   if (results.length === 0) {
     return null;
   }
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'artist':
+        return <User className="h-4 w-4 text-gray-400" />;
+      case 'album':
+        return <Disc className="h-4 w-4 text-gray-400" />;
+      case 'playlist':
+        return <ListMusic className="h-4 w-4 text-gray-400" />;
+      case 'track':
+      default:
+        return <Music className="h-4 w-4 text-gray-400" />;
+    }
+  };
+
+  const handleAddToPlaylist = (e: React.MouseEvent, item: any) => {
+    e.stopPropagation();
+    if (onAddToPlaylist) {
+      onAddToPlaylist(item);
+      toast({
+        title: "Added to playlist",
+        description: `${item.title} has been added to your playlist.`,
+      });
+    }
+  };
+
+  const openExternalLink = (e: React.MouseEvent, item: any) => {
+    e.stopPropagation();
+    window.open(`https://www.youtube.com/watch?v=${item.youtubeId}`, '_blank');
+  };
 
   return (
     <div className={cn(
@@ -41,26 +74,51 @@ const SearchResults = ({
       </div>
 
       <div className="space-y-2">
-        {results.map((track) => (
+        {results.map((item) => (
           <div 
-            key={track.id}
+            key={item.id}
             className={cn(
               "flex items-center p-2 rounded-md hover:bg-white/5 transition-colors cursor-pointer",
-              currentlyPlaying === track.id && "bg-primary/20"
+              currentlyPlaying === item.id && "bg-primary/20"
             )}
-            onClick={() => onPlay(track.id)}
+            onClick={() => item.type === 'track' ? onPlay(item.id) : null}
           >
-            <img 
-              src={track.albumArt} 
-              alt={track.title}
-              className="w-12 h-12 object-cover rounded mr-3" 
-            />
-            <div className="flex-1 min-w-0">
-              <h4 className="font-medium truncate">{track.title}</h4>
-              <p className="text-sm text-gray-400 truncate">{track.artist}</p>
+            <div className="flex-shrink-0 mr-3 relative">
+              <img 
+                src={item.albumArt} 
+                alt={item.title}
+                className="w-12 h-12 object-cover rounded" 
+              />
+              <span className="absolute top-0 right-0 bg-black/70 p-0.5 rounded text-xs">
+                {getTypeIcon(item.type)}
+              </span>
             </div>
-            <div className="text-xs text-gray-500 ml-3">
-              {track.duration}
+            <div className="flex-1 min-w-0">
+              <h4 className="font-medium truncate">{item.title}</h4>
+              <p className="text-sm text-gray-400 truncate">{item.artist}</p>
+              <div className="text-xs text-gray-500">
+                {item.type === 'track' ? item.duration : item.type}
+              </div>
+            </div>
+            <div className="flex items-center space-x-1 ml-2">
+              {item.type === 'track' && (
+                <>
+                  <button 
+                    onClick={(e) => handleAddToPlaylist(e, item)}
+                    className="p-1.5 rounded-full hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
+                    title="Add to playlist"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                  <button 
+                    onClick={(e) => openExternalLink(e, item)}
+                    className="p-1.5 rounded-full hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
+                    title="Open in YouTube"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         ))}

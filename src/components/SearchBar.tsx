@@ -1,190 +1,200 @@
 
-import React, { useState } from 'react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, Mic, MicOff } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-import { searchTracks } from '@/services/spotifyService';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Mic, Music, User, Disc, ListMusic } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from '@/hooks/use-toast';
+import { Toggle } from '@/components/ui/toggle';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface SearchBarProps {
   onSearchResults: (results: any[]) => void;
   className?: string;
+  showAdvanced?: boolean;
 }
 
-const SearchBar = ({ onSearchResults, className }: SearchBarProps) => {
+const SearchBar = ({ onSearchResults, className, showAdvanced = false }: SearchBarProps) => {
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
+  const [searchType, setSearchType] = useState('track');
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  
+  const genres = [
+    'pop', 'rock', 'rap', 'electronic', 'jazz', 'classical', 'r&b', 'country', 'indie'
+  ];
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
+  useEffect(() => {
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'fr-FR';
+      
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setQuery(transcript);
+        handleSearch(transcript);
+        setIsListening(false);
+      };
+      
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error', event);
+        toast({
+          title: "Error",
+          description: "Failed to recognize speech. Please try again.",
+          variant: "destructive"
+        });
+        setIsListening(false);
+      };
+      
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+    
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
+  
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      toast({
+        title: "Not Supported",
+        description: "Speech recognition is not supported in your browser.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (isListening) {
+      recognitionRef.current.abort();
+      setIsListening(false);
+    } else {
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
+  
+  const handleSearch = async (searchQuery = query) => {
+    if (!searchQuery.trim()) return;
     
     try {
-      setLoading(true);
-      const results = await searchTracks(query);
+      // In a real app, you would fetch from your API with the appropriate search parameters
+      const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&type=${searchType}${selectedGenre ? `&genre=${selectedGenre}` : ''}`);
+      let results = [];
+      
+      // Using mock data for demonstration
+      const mockResults = Array(10).fill(null).map((_, i) => ({
+        id: `track-${i}`,
+        title: `${searchQuery} Track ${i + 1}${selectedGenre ? ` (${selectedGenre})` : ''}`,
+        artist: `Artist ${i + 1}`,
+        albumArt: `https://picsum.photos/seed/${searchQuery}${i}/200/200`,
+        duration: '3:45',
+        youtubeId: 'dQw4w9WgXcQ',
+        type: searchType
+      }));
+      
+      results = mockResults;
       onSearchResults(results);
     } catch (error) {
       console.error('Search error:', error);
       toast({
-        variant: "destructive",
-        title: "Erreur de recherche",
-        description: "Impossible de trouver des résultats pour cette recherche."
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const startVoiceRecognition = () => {
-    if (window.webkitSpeechRecognition || window.SpeechRecognition) {
-      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-      const newRecognition = new SpeechRecognition();
-      
-      newRecognition.lang = 'fr-FR';
-      newRecognition.continuous = false;
-      newRecognition.interimResults = false;
-      
-      newRecognition.onstart = () => {
-        setIsListening(true);
-        toast({
-          title: "Écoute en cours",
-          description: "Dites le nom d'une chanson ou d'un artiste..."
-        });
-      };
-      
-      newRecognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setQuery(transcript);
-        setTimeout(async () => {
-          try {
-            setLoading(true);
-            const results = await searchTracks(transcript);
-            onSearchResults(results);
-          } catch (error) {
-            console.error('Search error after voice recognition:', error);
-          } finally {
-            setLoading(false);
-          }
-        }, 500);
-      };
-      
-      newRecognition.onerror = (event: any) => {
-        console.error('Voice recognition error:', event.error);
-        setIsListening(false);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible d'accéder au micro ou de reconnaître la voix."
-        });
-      };
-      
-      newRecognition.onend = () => {
-        setIsListening(false);
-      };
-      
-      setRecognition(newRecognition);
-      newRecognition.start();
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Non supporté",
-        description: "La reconnaissance vocale n'est pas supportée par votre navigateur."
+        title: "Error",
+        description: "Failed to perform search. Please try again.",
+        variant: "destructive"
       });
     }
   };
-
-  const stopVoiceRecognition = () => {
-    if (recognition) {
-      recognition.stop();
-      setIsListening(false);
-    }
-  };
-
-  const handleVoiceToggle = () => {
-    if (isListening) {
-      stopVoiceRecognition();
-    } else {
-      startVoiceRecognition();
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
 
+  const handleGenreSelect = (genre: string) => {
+    setSelectedGenre(selectedGenre === genre ? null : genre);
+  };
+  
   return (
-    <div className={cn("flex items-center space-x-2 w-full max-w-xl mx-auto", className)}>
-      <div className="relative flex-1">
-        <Input
-          type="text"
-          placeholder="Rechercher une chanson, un artiste..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="pr-10 bg-secondary/40 border-secondary"
-          disabled={loading}
-        />
+    <div className={cn("w-full max-w-4xl mx-auto", className)}>
+      <div className="relative">
+        <div className="flex items-center bg-black/40 border border-white/10 rounded-full overflow-hidden pl-4 pr-1 focus-within:border-primary">
+          <Search className="h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search for music..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyPress={handleKeyPress}
+            className="flex-1 bg-transparent border-none outline-none py-2 px-3 text-white placeholder:text-gray-500"
+          />
+          <button
+            onClick={toggleListening}
+            className={cn(
+              "p-2 rounded-full focus:outline-none transition-colors",
+              isListening ? "text-primary animate-pulse" : "text-gray-400 hover:text-white"
+            )}
+            aria-label="Voice search"
+          >
+            <Mic className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => handleSearch()}
+            className="bg-primary text-white p-2 rounded-full hover:bg-primary/90 transition-colors ml-1"
+            aria-label="Search"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+        </div>
       </div>
       
-      <Button 
-        onClick={handleSearch} 
-        variant="outline" 
-        size="icon" 
-        disabled={loading}
-        className="bg-secondary/40 hover:bg-secondary/60 border-secondary"
-      >
-        <Search className="h-5 w-5" />
-      </Button>
-      
-      <Button 
-        onClick={handleVoiceToggle} 
-        variant="outline" 
-        size="icon"
-        className={cn(
-          "bg-secondary/40 hover:bg-secondary/60 border-secondary",
-          isListening && "bg-primary/30 text-primary-foreground"
-        )}
-      >
-        {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-      </Button>
-      
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="bg-secondary/40 hover:bg-secondary/60 border-secondary"
-          >
-            Shazam
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80">
-          <div className="space-y-4">
-            <h3 className="font-medium">Qu'est-ce qui joue ?</h3>
-            <p className="text-sm text-muted-foreground">
-              Cliquez sur le bouton ci-dessous pour identifier une chanson qui joue près de vous.
-            </p>
-            <Button 
-              onClick={() => {
-                toast({
-                  title: "Information",
-                  description: "La fonctionnalité d'identification audio complète nécessite une API comme Shazam. Pour l'instant, utilisez la reconnaissance vocale."
-                });
-                startVoiceRecognition();
-              }}
-              className="w-full"
-            >
-              <Mic className="mr-2 h-4 w-4" />
-              Identifier la musique
-            </Button>
+      {showAdvanced && (
+        <div className="mt-2 bg-black/60 backdrop-blur-md rounded-lg p-3 border border-white/10 animate-fade-in">
+          <div className="mb-2">
+            <p className="text-sm text-gray-400 mb-1">Search by:</p>
+            <ToggleGroup type="single" value={searchType} onValueChange={(value) => value && setSearchType(value)}>
+              <ToggleGroupItem value="track" aria-label="Search tracks">
+                <Music className="h-4 w-4 mr-1" />
+                Tracks
+              </ToggleGroupItem>
+              <ToggleGroupItem value="artist" aria-label="Search artists">
+                <User className="h-4 w-4 mr-1" />
+                Artists
+              </ToggleGroupItem>
+              <ToggleGroupItem value="album" aria-label="Search albums">
+                <Disc className="h-4 w-4 mr-1" />
+                Albums
+              </ToggleGroupItem>
+              <ToggleGroupItem value="playlist" aria-label="Search playlists">
+                <ListMusic className="h-4 w-4 mr-1" />
+                Playlists
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
-        </PopoverContent>
-      </Popover>
+          
+          <div>
+            <p className="text-sm text-gray-400 mb-1">Filter by genre:</p>
+            <div className="flex flex-wrap gap-2">
+              {genres.map(genre => (
+                <Toggle
+                  key={genre}
+                  pressed={selectedGenre === genre}
+                  onPressedChange={() => handleGenreSelect(genre)}
+                  className="text-xs capitalize"
+                  size="sm"
+                >
+                  {genre}
+                </Toggle>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
