@@ -20,11 +20,15 @@ const App = () => {
   // Initialize theme from localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    // If no theme is saved, or the saved theme is dark, apply dark mode
-    if (!savedTheme || savedTheme === 'dark') {
+    // If saved theme is dark, apply dark mode, otherwise use light mode
+    if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+      // If no theme is saved, set it to light by default
+      if (!savedTheme) {
+        localStorage.setItem('theme', 'light');
+      }
     }
   }, []);
 

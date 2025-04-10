@@ -37,11 +37,11 @@ const ChartSection = ({
       <div className="container mx-auto">
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">{title}</h2>
-          {description && <p className="text-gray-600">{description}</p>}
+          {description && <p className="text-gray-600 dark:text-gray-400">{description}</p>}
         </div>
         
         {type === 'list' ? (
-          <div className="bg-white rounded-xl overflow-hidden shadow-md">
+          <div className="bg-white dark:bg-card rounded-xl overflow-hidden shadow-md">
             {songs.map((song, index) => (
               <SongCard
                 key={song.id}
@@ -60,7 +60,7 @@ const ChartSection = ({
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-            {songs.map((song, index) => (
+            {songs.map((song) => (
               <SongCard
                 key={song.id}
                 id={song.id}

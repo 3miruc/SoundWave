@@ -4,14 +4,18 @@ import { Sun, Moon } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 const ThemeToggle = () => {
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     // Check if user has a previous theme preference stored
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-      setIsDarkMode(false);
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      // Par défaut, utiliser le thème clair (enlever la classe dark)
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   }, []);
 
