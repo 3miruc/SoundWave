@@ -1,69 +1,60 @@
-# Welcome to your Lovable project
+SoundWave - Site de recommandations de musique
+Bienvenue sur SoundWave, un site conçu pour vous aider à découvrir la musique qui correspond à vos goûts. Ce projet a été réalisé avec Node.js et Vue.js, et permet aux utilisateurs de naviguer à travers une large sélection de morceaux populaires tout en bénéficiant d'une interface claire et intuitive grâce à l'intégration de l'API Spotify.
 
-## Project info
+À propos du projet
+SoundWave est une plateforme dédiée à la découverte de musique. L'objectif principal est de simplifier la recherche de morceaux populaires, en fonction des tendances actuelles, tout en permettant aux utilisateurs de créer des playlists de leurs morceaux favoris.
 
-**URL**: https://lovable.dev/projects/0eee378b-7f68-43e7-86c5-7712abcb11cf
+Sections principales :
+Hits du moment : Découvrez les morceaux populaires actuels, mis à jour en temps réel grâce à l'API Spotify.
 
-## How can I edit this code?
+Favoris : Ajoutez vos morceaux préférés à vos favoris, organisés dans une playlist personnalisée.
 
-There are several ways of editing your application.
+Recherche : Un moteur de recherche intégré vous permet de trouver rapidement la musique de votre choix, par artiste, genre ou titre.
 
-**Use Lovable**
+Fonctionnalités :
+Design Responsive : S'adapte à toutes les tailles d'écran (ordinateurs, tablettes, smartphones).
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0eee378b-7f68-43e7-86c5-7712abcb11cf) and start prompting.
+Recherche avancée : Recherchez des morceaux, artistes ou albums par genre, titre ou popularité.
 
-Changes made via Lovable will be committed automatically to this repo.
+Gestion des favoris : Classez vos morceaux et artistes préférés dans une playlist distincte.
 
-**Use your preferred IDE**
+Affichage dynamique : La liste des hits et de vos favoris est automatiquement mise à jour à chaque ajout.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Technologies utilisées
+Node.js & Vue.js : Ces technologies permettent une expérience utilisateur fluide et performante.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Tailwind CSS : Utilisé pour un design moderne et réactif.
 
-Follow these steps:
+API Spotify : Récupération des informations de morceaux populaires, albums et artistes directement depuis l'API de Spotify.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Installation du projet
+Pour installer et exécuter SoundWave sur votre machine locale, suivez les étapes ci-dessous :
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Clonez le projet depuis GitHub :
 
-# Step 3: Install the necessary dependencies.
-npm i
+bash
+Copier
+Modifier
+git clone https://github.com/3miruc/SoundWave.git
+Accédez au répertoire du projet :
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+bash
+Copier
+Modifier
+cd SoundWave
+Installez les dépendances nécessaires :
+
+bash
+Copier
+Modifier
+npm install
+Lancez le serveur de développement :
+
+bash
+Copier
+Modifier
 npm run dev
-```
+Cela démarrera le serveur de développement, et vous pourrez accéder à l'application en ouvrant votre navigateur à l'adresse http://localhost:3000.
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/0eee378b-7f68-43e7-86c5-7712abcb11cf) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+Conclusion
+SoundWave est un projet en constante évolution, visant à offrir une expérience fluide et agréable pour les amateurs de musique. Ce site représente mes compétences en développement web et est une ressource pratique pour découvrir de nouveaux morceaux, albums et artistes tout en gardant une trace de vos préférences musicales. Je continue à améliorer et à enrichir ses fonctionnalités pour répondre aux attentes des utilisateurs.
